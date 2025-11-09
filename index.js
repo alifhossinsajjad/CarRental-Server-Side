@@ -32,6 +32,7 @@ async function run() {
     const carRentalUsersDb = client.db("car_rentaldb");
     const usersCollection = carRentalUsersDb.collection("users");
     const carsCollections = carRentalUsersDb.collection("cars");
+    const bookingsCollections = carRentalUsersDb.collection('bookings')
 
     app.get("/users", async (req, res) => {
       const users = await usersCollection.find().toArray();
@@ -102,6 +103,19 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await carsCollections.deleteOne(query);
       res.send(result);
+    });
+
+    //booked car api
+    app.post("/cars/:id", async (req, res) => {
+     const data = req.body;
+     const id = req.params.id;
+     const result = await bookingsCollections.insertOne(data);
+     const query = {_id: new ObjectId(id)}
+     const update = {
+      $set : {status : 'Booked'}
+     }
+     const bookedStatus = await carsCollections.updateOne(query,update)
+     res.send(result,bookedStatus)
     });
 
     await client.db("admin").command({ ping: 1 });
