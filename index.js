@@ -27,34 +27,51 @@ app.get("/", (req, res) => {
 
 async function run() {
   try {
-    await client.connect();
-    
+    // await client.connect();
+
     const carRentalUsersDb = client.db("car_rentaldb");
-    const usersCollection = carRentalUsersDb.collection("users"); 
+    const usersCollection = carRentalUsersDb.collection("users");
+    const carsCollections = carRentalUsersDb.collection("cars");
 
-    //users api 
-    app.post("/users", async (req, res) => {
-      const newUser = req.body;
-      const email = req.body.email;
-      const query = { email: email };
-      const existingUser = await usersCollection.findOne(query); 
-
-      if (existingUser) {
-        res.status(409).send({ message: "User already exists. Please use another email." }); 
-      } else {
-        const result = await usersCollection.insertOne(newUser); 
-        res.send(result);
-      }
-    });
-
-  
     app.get("/users", async (req, res) => {
       const users = await usersCollection.find().toArray();
       res.send(users);
     });
 
+    //users api
+    app.post("/users", async (req, res) => {
+      const newUser = req.body;
+      const email = req.body.email;
+      const query = { email: email };
+      const existingUser = await usersCollection.findOne(query);
+
+      if (existingUser) {
+        res
+          .status(409)
+          .send({ message: "User already exists. Please use another email." });
+      } else {
+        const result = await usersCollection.insertOne(newUser);
+        res.send(result);
+      }
+    });
+
+    //all cars api
+    app.get("/cars", async (req, res) => {
+      const result = await carsCollections.find().toArray();
+      res.send(result);
+    });
+
+    app.get("/cars/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await carsCollections.findOne(query);
+      res.send(result);
+    });
+
     await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    console.log(
+      "Pinged your deployment. You successfully connected to MongoDB!"
+    );
   } catch (error) {
     console.error("Database connection error:", error);
   }
