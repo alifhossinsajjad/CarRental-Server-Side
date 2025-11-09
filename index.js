@@ -68,6 +68,42 @@ async function run() {
       res.send(result);
     });
 
+    //update car
+    app.put("/cars/:id", async (req, res) => {
+      try {
+        const id = req.params.id;
+
+        const updateCar = req.body;
+
+        const query = { _id: new ObjectId(id) };
+
+        const result = await carsCollections.updateOne(query, {
+          $set: {
+            rentPricePerDay: Number(updateCar.rentPricePerDay),
+            carName: updateCar.carName,
+            carModel: updateCar.carModel,
+            image: updateCar.image,
+            category: updateCar.category,
+          },
+        });
+
+        res.send(result);
+      } catch (error) {
+        res
+          .status(500)
+          .send({ message: "Error updating car", error: error.message });
+      }
+    });
+
+    //delete car
+
+    app.delete("/cars/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await carsCollections.deleteOne(query);
+      res.send(result);
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
