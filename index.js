@@ -32,7 +32,7 @@ async function run() {
     const carRentalUsersDb = client.db("car_rentaldb");
     const usersCollection = carRentalUsersDb.collection("users");
     const carsCollections = carRentalUsersDb.collection("cars");
-    const bookingsCollections = carRentalUsersDb.collection('bookings')
+    const bookingsCollections = carRentalUsersDb.collection("bookings");
 
     app.get("/users", async (req, res) => {
       const users = await usersCollection.find().toArray();
@@ -107,15 +107,24 @@ async function run() {
 
     //booked car api
     app.post("/cars/:id", async (req, res) => {
-     const data = req.body;
-     const id = req.params.id;
-     const result = await bookingsCollections.insertOne(data);
-     const query = {_id: new ObjectId(id)}
-     const update = {
-      $set : {status : 'Booked'}
-     }
-     const bookedStatus = await carsCollections.updateOne(query,update)
-     res.send(result,bookedStatus)
+      const data = req.body;
+      const id = req.params.id;
+      const result = await bookingsCollections.insertOne(data);
+      const query = { _id: new ObjectId(id) };
+      const update = {
+        $set: { status: "Booked" },
+      };
+      const bookedStatus = await carsCollections.updateOne(query, update);
+      res.send(result, bookedStatus);
+    });
+
+    app.get("/my-bookings", async (req, res) => {
+      const email = req.query.email;
+      const result = await bookingsCollections.find({
+        booked_by: email
+      }).toArray();
+
+      res.send(result);
     });
 
     await client.db("admin").command({ ping: 1 });
