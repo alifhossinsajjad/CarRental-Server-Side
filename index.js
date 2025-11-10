@@ -66,8 +66,6 @@ async function run() {
     app.post("/cars", async (req, res) => {
       try {
         const newCar = req.body;
-
-        // Add default values and ensure proper data types
         const carData = {
           ...newCar,
           status: "Available",
@@ -79,7 +77,6 @@ async function run() {
 
         const result = await carsCollections.insertOne(carData);
 
-        // Send proper JSON response with success field
         res.status(201).json({
           success: true,
           message: "Car added successfully!",
@@ -132,24 +129,24 @@ async function run() {
       }
     });
 
-    //delete car
-
-    app.delete("/cars/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await carsCollections.deleteOne(query);
-      res.send(result);
-    });
-
     //my-listing api
     app.get("/my-listing", async (req, res) => {
       const email = req.query.email;
-      const result = await bookingsCollections
+      const result = await carsCollections
         .find({
-          booked_by: email,
+          created_by: email,
         })
         .toArray();
 
+      res.send(result);
+    });
+
+    //delete car
+    app.delete("/my-bookings/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = { carId: id };
+      const result = await bookingsCollections.deleteOne(query);
       res.send(result);
     });
 
@@ -165,12 +162,22 @@ async function run() {
       res.send(result);
     });
 
+    //delete car
+
+    app.delete("/cars/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await bookingsCollections.deleteOne(query);
+      res.send(result);
+    });
+
     //booked car api
     app.post("/my-bookings/:id", async (req, res) => {
       const data = req.body;
+      // console.log('booking data',data);
       const id = req.params.id;
       const result = await bookingsCollections.insertOne(data);
-      result;
+      // console.log('booking result',result);
       const query = { _id: new ObjectId(id) };
       const update = {
         $set: { status: "Booked" },
