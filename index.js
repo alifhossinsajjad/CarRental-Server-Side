@@ -95,10 +95,18 @@ async function run() {
       }
     });
 
+    //get the signle cars data with id
     app.get("/cars/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await carsCollections.findOne(query);
+      res.send(result);
+    });
+
+    //get the newst cars
+    app.get("/latest-cars", async (req, res) => {
+      const cursor = carsCollections.find().sort({ created_at: -1 }).limit(6);
+      const result = await cursor.toArray();
       res.send(result);
     });
 
@@ -163,7 +171,6 @@ async function run() {
     });
 
     //delete car
-
     app.delete("/cars/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
