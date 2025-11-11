@@ -166,24 +166,19 @@ async function run() {
     //   res.send(result);
     // });
 
-    //dose not uses this api any route
     //canle book from booking carId
     app.delete("/my-bookings/:carId", async (req, res) => {
       try {
         const carId = req.params.carId;
         console.log("Cancelling booking for car ID:", carId);
-
         const query = { carId: carId };
         const result = await bookingsCollections.deleteOne(query);
-
         const carQuery = { _id: new ObjectId(carId) };
-        const update = { $set: { status: "available" } };
+        const update = { $set: { status: "Available" } };
         const carUpdateResult = await carsCollections.updateOne(
           carQuery,
           update
         );
-
-        // Send a single response object
         res.send({
           deletedCount: result.deletedCount,
           carUpdated: carUpdateResult.modifiedCount > 0,
@@ -216,11 +211,9 @@ async function run() {
 
         const query = { _id: new ObjectId(id) };
         const update = {
-          $set: { status: "booked" }, 
+          $set: { status: "Booked" },
         };
         const bookedStatus = await carsCollections.updateOne(query, update);
-
-     
         res.send({
           bookingId: result.insertedId,
           carUpdated: bookedStatus.modifiedCount > 0,
@@ -230,8 +223,6 @@ async function run() {
         res.status(500).send({ error: "Failed to create booking" });
       }
     });
-
-
 
     await client.db("admin").command({ ping: 1 });
     console.log(
