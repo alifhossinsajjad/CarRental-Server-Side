@@ -149,24 +149,50 @@ async function run() {
       res.send(result);
     });
 
-
     //delete from car callection
     app.delete("/cars/:id", async (req, res) => {
       const id = req.params.id;
       console.log(id);
-      const query = { _id: new ObjectId(id)};
+      const query = { _id: new ObjectId(id) };
       const result = await carsCollections.deleteOne(query);
       res.send(result);
     });
 
+    // //delete car
+    // app.delete("/cars/:id", async (req, res) => {
+    //   const id = req.params.id;
+    //   const query = { _id: new ObjectId(id) };
+    //   const result = await bookingsCollections.deleteOne(query);
+    //   res.send(result);
+    // });
 
-    //canle book from booking car
-    app.delete("/my-bookings/:id", async (req, res) => {
-      const id = req.params.id;
-      console.log(id);
-      const query = { carId: id };
-      const result = await bookingsCollections.deleteOne(query);
-      res.send(result);
+    //dose not uses this api any route
+    //canle book from booking carId
+    app.delete("/my-bookings/:carId", async (req, res) => {
+      try {
+        const carId = req.params.carId;
+        console.log("Cancelling booking for car ID:", carId);
+
+        const query = { carId: carId };
+        const result = await bookingsCollections.deleteOne(query);
+
+        const carQuery = { _id: new ObjectId(carId) };
+        const update = { $set: { status: "available" } };
+        const carUpdateResult = await carsCollections.updateOne(
+          carQuery,
+          update
+        );
+
+        // Send a single response object
+        res.send({
+          deletedCount: result.deletedCount,
+          carUpdated: carUpdateResult.modifiedCount > 0,
+          carId: carId,
+        });
+      } catch (error) {
+        console.error("Error cancelling booking:", error);
+        res.status(500).send({ error: "Internal server error" });
+      }
     });
 
     //my booking gei api
@@ -181,28 +207,31 @@ async function run() {
       res.send(result);
     });
 
-    //delete car
-    app.delete("/cars/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await bookingsCollections.deleteOne(query);
-      res.send(result);
-    });
-
     //booked car api
     app.post("/my-bookings/:id", async (req, res) => {
-      const data = req.body;
-      // console.log('booking data',data);
-      const id = req.params.id;
-      const result = await bookingsCollections.insertOne(data);
-      // console.log('booking result',result);
-      const query = { _id: new ObjectId(id) };
-      const update = {
-        $set: { status: "Booked" },
-      };
-      const bookedStatus = await carsCollections.updateOne(query, update);
-      res.send(result, bookedStatus);
+      try {
+        const data = req.body;
+        const id = req.params.id;
+        const result = await bookingsCollections.insertOne(data);
+
+        const query = { _id: new ObjectId(id) };
+        const update = {
+          $set: { status: "booked" }, 
+        };
+        const bookedStatus = await carsCollections.updateOne(query, update);
+
+     
+        res.send({
+          bookingId: result.insertedId,
+          carUpdated: bookedStatus.modifiedCount > 0,
+        });
+      } catch (error) {
+        console.error("Error creating booking:", error);
+        res.status(500).send({ error: "Failed to create booking" });
+      }
     });
+
+
 
     await client.db("admin").command({ ping: 1 });
     console.log(
