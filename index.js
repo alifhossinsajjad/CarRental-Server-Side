@@ -78,7 +78,7 @@ async function run() {
         const result = await carsCollections.insertOne(carData);
 
         res.status(201).json({
-          success: true,
+       
           message: "Car added successfully!",
           data: {
             _id: result.insertedId,
@@ -88,7 +88,7 @@ async function run() {
       } catch (error) {
         console.error("Error adding car:", error);
         res.status(500).json({
-          success: false,
+     
           message: "Failed to add car",
           error: error.message,
         });
@@ -225,7 +225,6 @@ async function run() {
     });
 
     //search api for cars
-
     app.get("/search", async (req, res) => {
       const keyword = req.query.search;
 
@@ -243,7 +242,7 @@ async function run() {
       res.send(results);
     });
 
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
