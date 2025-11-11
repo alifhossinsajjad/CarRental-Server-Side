@@ -149,7 +149,18 @@ async function run() {
       res.send(result);
     });
 
-    //delete car
+
+    //delete from car callection
+    app.delete("/cars/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: new ObjectId(id)};
+      const result = await carsCollections.deleteOne(query);
+      res.send(result);
+    });
+
+
+    //canle book from booking car
     app.delete("/my-bookings/:id", async (req, res) => {
       const id = req.params.id;
       console.log(id);
