@@ -224,6 +224,25 @@ async function run() {
       }
     });
 
+    //search api for cars
+
+    app.get("/search", async (req, res) => {
+      const keyword = req.query.search;
+
+      if (!keyword) {
+        const cars = await carsCollections.find().limit(6).toArray();
+        return res.send(cars);
+      }
+
+      const results = await carsCollections
+        .find({
+          carName: { $regex: keyword, $options: "i" },
+        })
+        .toArray();
+
+      res.send(results);
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
