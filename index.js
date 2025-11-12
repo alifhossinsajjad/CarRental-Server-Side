@@ -78,7 +78,7 @@ async function run() {
         const result = await carsCollections.insertOne(carData);
 
         res.status(201).json({
-       
+          success: true, 
           message: "Car added successfully!",
           data: {
             _id: result.insertedId,
@@ -88,7 +88,7 @@ async function run() {
       } catch (error) {
         console.error("Error adding car:", error);
         res.status(500).json({
-     
+          success: false, 
           message: "Failed to add car",
           error: error.message,
         });
